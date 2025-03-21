@@ -1,0 +1,450 @@
+openapi: 3.0.3
+info:
+  title: Moneytory API
+  version: "1.0"
+  description: Storying your personal transactions.
+  contact:
+    name: rafifmulia
+    email: rafif.mulia.r@gmail.com
+    url: https://www.linkedin.com/in/rafif-mulia/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://{env}.localhost:{port}/v1
+    variables:
+      env:
+        default: dev
+        enum:
+          - dev
+          - stag
+          - prod
+      port:
+        default: "8080"
+paths:
+  /transaction:
+    get:
+      security:
+        - "UserAuth": []
+      description: List all transactions.
+      tags:
+        - Transaction
+      parameters:
+        - $ref: "#/components/parameters/paramTrxFilter"
+        - $ref: "#/components/parameters/paramTrxRangeStart"
+        - $ref: "#/components/parameters/paramTrxRangeEnd"
+      responses:
+        200:
+          description: Success list transactions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespListTransactions"
+              examples:
+                dummy:
+                  $ref: "#/components/examples/ScListDummyTransactions"
+        400:
+          $ref: "#/components/responses/RespBadRequest"
+        401:
+          $ref: "#/components/responses/RespUnauthorized"
+        404:
+          $ref: "#/components/responses/RespNotFound"
+        422:
+          $ref: "#/components/responses/RespUnprocessableEntity"
+        500:
+          $ref: "#/components/responses/RespInternalServerError"
+    post:
+      security:
+        - "UserAuth": []
+      description: Add transaction.
+      tags:
+        - Transaction
+      requestBody:
+        $ref: "#/components/requestBodies/ReqCreateTransaction"
+      responses:
+        201:
+          description: Success add transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespDetailTransaction"
+              examples:
+                dummy:
+                  $ref: "#/components/examples/ScDetailDummyTransaction"
+        400:
+          $ref: "#/components/responses/RespBadRequest"
+        401:
+          $ref: "#/components/responses/RespUnauthorized"
+        422:
+          $ref: "#/components/responses/RespUnprocessableEntity"
+        500:
+          $ref: "#/components/responses/RespInternalServerError"
+  /transaction/{paramTrxId}:
+    get:
+      security:
+        - "UserAuth": []
+      description: Get detail transaction.
+      tags:
+        - Transaction
+      parameters:
+        - $ref: "#/components/parameters/paramTrxId"
+      responses:
+        200:
+          description: Success get detail transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespDetailTransaction"
+              examples:
+                dummy:
+                  $ref: "#/components/examples/ScDetailDummyTransaction"
+        400:
+          $ref: "#/components/responses/RespBadRequest"
+        401:
+          $ref: "#/components/responses/RespUnauthorized"
+        404:
+          $ref: "#/components/responses/RespNotFound"
+        422:
+          $ref: "#/components/responses/RespUnprocessableEntity"
+        500:
+          $ref: "#/components/responses/RespInternalServerError"
+    put:
+      security:
+        - "UserAuth": []
+      description: Update transaction.
+      tags:
+        - Transaction
+      parameters:
+        - $ref: "#/components/parameters/paramTrxId"
+      requestBody:
+        $ref: "#/components/requestBodies/ReqUpdateTransaction"
+      responses:
+        200:
+          description: Success update transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespDetailTransaction"
+              examples:
+                dummy:
+                  $ref: "#/components/examples/ScDetailDummyTransaction"
+        400:
+          $ref: "#/components/responses/RespBadRequest"
+        401:
+          $ref: "#/components/responses/RespUnauthorized"
+        404:
+          $ref: "#/components/responses/RespNotFound"
+        422:
+          $ref: "#/components/responses/RespUnprocessableEntity"
+        500:
+          $ref: "#/components/responses/RespInternalServerError"
+    delete:
+      security:
+        - "UserAuth": []
+      description: Delete transaction.
+      tags:
+        - Transaction
+      parameters:
+        - $ref: "#/components/parameters/paramTrxId"
+      responses:
+        200:
+          description: Success delete transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Meta"
+              example:
+                meta:
+                  code: 200
+                  message: Success delete transaction.
+        400:
+          $ref: "#/components/responses/RespBadRequest"
+        401:
+          $ref: "#/components/responses/RespUnauthorized"
+        422:
+          $ref: "#/components/responses/RespUnprocessableEntity"
+        500:
+          $ref: "#/components/responses/RespInternalServerError"
+components:
+  securitySchemes:
+    UserAuth:
+      type: apiKey
+      name: X-API-Key
+      in: header
+  responses:
+    # Responses hanya diperlukan jika penggunannya digunakan oleh banyak path;
+    # jika hanya sedikit lebih baik langsung di definisikan di operation object saja.
+    RespBadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                code: 400
+                message: Problem parsing request data.
+    RespNotFound:
+      description: Empty data or not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+          example:
+            meta:
+              code: 404
+              message: Data is empty or not found.
+    RespUnauthorized:
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                code: 401
+                message: Unauthorized.
+    RespUnprocessableEntity:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                code: 422
+                message: Missing field x.
+    RespInternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              meta:
+                $ref: "#/components/schemas/Meta"
+            example:
+              meta:
+                code: 500
+                message: Internal server error.
+  schemas:
+    # Schemas yang kata bendanya singular, merupakan bentuk full datanya dalam bentuk object; jika plural, versi array nya.
+    # Prefix Create diperuntukkan untuk pembuatan data baru, dan banyak required fields, serta biasanya tidak memiliki id.
+    # Prefix Save diperuntukkan untuk update data lama, biasanya hanya id yang field nya required.
+    # Prefix Req diperuntukkan untuk http request.
+    # Prefix Resp diperuntukkan untuk http response.
+    # Prefix Enum seperti constanta.
+    # Prefix Type diperuntukkan untuk custom type.
+    Meta:
+      type: object
+      properties:
+        code:
+          type: integer
+          x-go-type-skip-optional-pointer: true
+        message:
+          type: string
+          x-go-type-skip-optional-pointer: true
+    Transactions:
+      type: array
+      x-go-type-skip-optional-pointer: true
+      items:
+        $ref: "#/components/schemas/Transaction"
+    Transaction:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          minLength: 1
+          x-omitempty: true
+          x-go-type: string
+        description:
+          type: string
+          minLength: 1
+          x-omitempty: true
+        date:
+          type: string
+          format: date-time
+          minLength: 10
+          x-omitempty: true
+        amount:
+          type: number
+          format: double
+          minimum: 1
+          x-omitempty: true
+    ReqCreateTransaction:
+      type: object
+      required:
+        - description
+        - date
+        - amount
+      properties:
+        description:
+          type: string
+          nullable: true
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            form: "description,omitempty"
+            validate: "required,printascii,lte=125"
+        date:
+          type: string
+          format: date-time
+          nullable: true
+          minLength: 10
+          x-oapi-codegen-extra-tags:
+            form: "date,omitempty"
+            validate: "required"
+        amount:
+          type: number
+          format: double
+          nullable: true
+          minimum: 1
+          x-oapi-codegen-extra-tags:
+            form: "amount,omitempty"
+            validate: "required,number,gt=0"
+    ReqUpdateTransaction:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+          x-oapi-codegen-extra-tags:
+            form: "description,omitempty"
+            validate: "omitempty,printascii,lte=125"
+        date:
+          type: string
+          format: date-time
+          minLength: 10
+          x-oapi-codegen-extra-tags:
+            form: "date,omitempty"
+        amount:
+          type: number
+          format: double
+          minimum: 1
+          x-oapi-codegen-extra-tags:
+            form: "amount,omitempty"
+            validate: "omitempty,number,gt=0"
+    RespListTransactions:
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/Meta"
+        data:
+          $ref: "#/components/schemas/Transactions"
+    RespDetailTransaction:
+      type: object
+      properties:
+        meta:
+          $ref: "#/components/schemas/Meta"
+        data:
+          $ref: "#/components/schemas/Transaction"
+    EnumCalendarFilter:
+      type: string
+      enum:
+        - today
+        - week
+        - month
+        - year
+        - custom
+      minLength: 1
+      nullable: false
+      default: month
+      example: month
+    TypeDate:
+      type: string
+      format: date
+      x-go-type: string
+      minLength: 10
+      nullable: true
+  requestBodies:
+    ReqCreateTransaction:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: "#/components/schemas/ReqCreateTransaction"
+          examples:
+            dummy:
+              $ref: "#/components/examples/DummyTransaction"
+    ReqUpdateTransaction:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: "#/components/schemas/ReqUpdateTransaction"
+          examples:
+            dummy:
+              $ref: "#/components/examples/DummyTransaction"
+  examples:
+    # Examples yang memiliki prefix Sc diperuntukkan untuk http response;
+    # jika tidak ada maka diperuntukkan untuk http request.
+    DummyTransaction:
+      value:
+        description: Jajan di Indomaret
+        date: "2025-02-19T21:36:21+07:00"
+        amount: 10000
+    ScListDummyTransactions:
+      value:
+        meta:
+          code: 200
+          message: Success list dummy transactions.
+        data:
+          - uuid: 01956b10-0705-7991-a9d3-bdf907da1207
+            description: Jajan di Indomaret
+            date: "2025-02-19T21:36:21+07:00"
+            amount: 10000
+    ScDetailDummyTransaction:
+      value:
+        meta:
+          code: 200
+          message: Success get detail dummy transactions.
+        data:
+          uuid: 01956b10-0705-7991-a9d3-bdf907da1207
+          description: Jajan di Indomaret
+          date: "2025-02-19T21:36:21+07:00"
+          amount: 10000
+  parameters:
+    paramTrxId:
+      name: paramTrxId
+      in: path
+      description: unique UUID as transaction identifier.
+      required: true
+      schema:
+        x-go-type: uuid.UUID
+        x-go-type-import:
+          path: github.com/google/uuid
+          name: uuid
+    paramTrxFilter:
+      name: filter
+      in: query
+      required: false
+      x-go-type-skip-optional-pointer: true
+      schema:
+        $ref: "#/components/schemas/EnumCalendarFilter"
+    paramTrxRangeStart:
+        name: range_start
+        in: query
+        required: false
+        x-go-type-skip-optional-pointer: true
+        schema:
+          $ref: "#/components/schemas/TypeDate"
+        example: "2025-02-01"
+    paramTrxRangeEnd:
+        name: range_end
+        in: query
+        required: false
+        x-go-type-skip-optional-pointer: true
+        schema:
+          $ref: "#/components/schemas/TypeDate"
+        example: "2025-02-28"
+      
