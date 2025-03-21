@@ -32,7 +32,7 @@ func doPrefork(isChild bool, bind string) (listener net.Listener) {
 			log.Fatal(err)
 		}
 		log.Println("Shared TCP file:", fl.Name())
-		children := make([]*exec.Cmd, runtime.NumCPU()/2)
+		children := make([]*exec.Cmd, runtime.NumCPU()) // runtime.NumCPU()/2
 		environ := os.Environ()
 		environ = append(environ, "")
 		for i := range children {
@@ -66,7 +66,7 @@ func doPrefork(isChild bool, bind string) (listener net.Listener) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		runtime.GOMAXPROCS(runtime.NumCPU() / 2)
+		runtime.GOMAXPROCS(1) // runtime.NumCPU() / 2
 		log.Println("Run as a children", os.Getenv("CHILD_ID"))
 	}
 	return listener
